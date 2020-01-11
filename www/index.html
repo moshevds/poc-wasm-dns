@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello wasm-pack!</title>
+  </head>
+  <body>
+    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+    <table>
+     <tbody>
+      <tr>
+       <td>Domain:</td>
+       <td style="text-align: center; width: 100%;"><input id="domain-input" type="text" style="width: 90%;" value="dns.google" /></td>
+       <td>
+        <select id="query-type">
+         <option value="A">A</option>
+         <option value="AAAA" selected>AAAA</option>
+         <option value="ANY">ANY</option>
+         <option value="AXFR">AXFR</option>
+         <option value="CAA">CAA</option>
+         <option value="CNAME">CNAME</option>
+         <option value="IXFR">IXFR</option>
+         <option value="MX">MX</option>
+         <option value="NS">NS</option>
+         <option value="NULL">NULL</option>
+         <option value="OPT">OPT</option>
+         <option value="PTR">PTR</option>
+         <option value="SOA">SOA</option>
+         <option value="SRV">SRV</option>
+         <option value="TLSA">TLSA</option>
+         <option value="TXT">TXT</option>
+        </select>
+       </td>
+       <td><button type="button" id="query-button">Query</button></td>
+      </tr>
+     </tbody>
+    </table>
+    <textarea id="output-area" style="width: 100%; height: 100em;"></textarea>
+    <script src="./bootstrap.js"></script>
+  </body>
+</html>
