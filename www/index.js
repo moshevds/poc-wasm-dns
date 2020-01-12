@@ -7,7 +7,7 @@ let button = document.getElementById("query-button");
 let query_type = document.getElementById("query-type");
 
 let run_query = ev => {
-  wasm.query("https://doh.magellanic.dev/dns-query", input.value, query_type.value).then(result => {
+  wasm.query("https://dns.google/dns-query?dns=", input.value, query_type.value).then(result => {
     output.value = JSON.stringify(result, null, 2);
   });
 };

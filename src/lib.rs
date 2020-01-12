@@ -32,20 +32,42 @@ fn query_as_vec(name: &str, query_type: trust_dns_proto::rr::RecordType) -> Resu
     message.to_vec()
 }
 
-async fn wire_with_fetch(doh_url_str: &str, request: std::vec::Vec<u8>) -> Result<std::vec::Vec<u8>, JsValue> {
-    let mut opts = web_sys::RequestInit::new();
-    opts.method("POST");
-    opts.mode(web_sys::RequestMode::Cors);
-    opts.body(Some(&(js_sys::Uint8Array::from(request.as_slice()).buffer()).into()));
+pub enum DohMethod {
+    GET,
+    POST
+}
 
-    let request = web_sys::Request::new_with_str_and_init(
-        doh_url_str,
-        &opts,
-    )?;
+async fn wire_with_fetch(doh_method: DohMethod, doh_url_str: &str, request: std::vec::Vec<u8>) -> Result<std::vec::Vec<u8>, JsValue> {
 
-    request
-        .headers()
-        .set("Content-Type", "application/dns-message")?;
+    let request = match doh_method {
+        DohMethod::GET => {
+            let mut opts = web_sys::RequestInit::new();
+            opts.mode(web_sys::RequestMode::Cors);
+            opts.method("GET");
+            let dns_param = data_encoding::BASE64URL_NOPAD.encode(request.as_slice());
+            let constructed_url = format!("{}{}", doh_url_str, dns_param);
+            web_sys::Request::new_with_str_and_init(
+                &constructed_url,
+                &opts,
+            )?
+        }
+        DohMethod::POST => {
+            let mut opts = web_sys::RequestInit::new();
+            opts.mode(web_sys::RequestMode::Cors);
+            opts.method("POST");
+            opts.body(Some(&(js_sys::Uint8Array::from(request.as_slice()).buffer()).into()));
+            let constructed_url = doh_url_str;
+            let request = web_sys::Request::new_with_str_and_init(
+                &constructed_url,
+                &opts,
+            )?;
+            request
+                .headers()
+                .set("Content-Type", "application/dns-message")?;
+            request
+        }
+    };
+
     request
         .headers()
         .set("Accept", "application/dns-message")?;
@@ -114,7 +136,7 @@ pub async fn query(doh_url: JsValue, name: JsValue, query_type: JsValue) -> Resu
         Err(_)  => Err("trust_dns_proto::error::ProtoError")
     }?;
 
-    let response_wire_message = wire_with_fetch(&doh_url_str, request_wire_message).await?;
+    let response_wire_message = wire_with_fetch(DohMethod::GET, &doh_url_str, request_wire_message).await?;
 
     // TODO: Implementing From<ProtoError> as a JsValue would be better
     let dns_response = match trust_dns_proto::op::Message::from_vec(&response_wire_message) {
